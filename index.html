@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Desafio Geológico - Prof. Legeo</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -22,39 +22,40 @@
             margin: 0;
             padding: 0;
             font-family: 'Montserrat', sans-serif;
-            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            /* Uso de dvh para garantir adaptação dinâmica à altura útil real do celular */
+            height: 100dvh;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
         #app-container {
             width: 100%;
-            max-width: 600px;
-            height: 100vh;
+            max-width: 650px; /* Um pouco mais largo para PCs */
+            height: 100%; /* Ocupa 100% da dvh do body */
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            padding: 10px;
             position: relative;
         }
 
-        /* Telas */
+        /* Estrutura Base das Telas */
         .screen {
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             height: 100%;
             text-align: center;
-            animation: fadeIn 0.5s ease;
+            animation: fadeIn 0.4s ease;
+            overflow: hidden; /* Evita scroll na tela de jogo */
         }
         .screen.active { display: flex; }
 
@@ -63,144 +64,174 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Títulos e Botões */
+        /* --- Tela Inicial e Final --- */
+        #screen-start, #screen-end {
+            justify-content: center;
+            overflow-y: auto; /* Permite scroll apenas nessas telas se necessário */
+            padding: 20px 0;
+        }
+
         h1 {
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 8vw, 2.5rem);
             font-weight: 900;
             background: var(--magma-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
 
-        h2 { font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary-color); }
-        
-        p.subtitle { font-size: 1rem; color: #aaa; margin-bottom: 25px; line-height: 1.5; padding: 0 10px;}
+        p.subtitle {
+            font-size: clamp(0.9rem, 4vw, 1rem);
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 0 15px;
+            max-width: 450px;
+        }
 
-        /* Inputs de Identificação */
+        .input-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         .input-field {
-            width: 80%;
-            max-width: 300px;
+            width: 85%;
+            max-width: 350px;
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid #444;
             color: var(--text-color);
-            padding: 14px 20px;
+            padding: 12px 18px;
             border-radius: 25px;
             font-size: 1rem;
-            margin-bottom: 15px;
             text-align: center;
             outline: none;
-            transition: border-color 0.3s, background 0.3s;
+            transition: border-color 0.3s;
         }
-        .input-field:focus {
-            border-color: var(--secondary-color);
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .input-field::placeholder { color: #888; }
+        .input-field:focus { border-color: var(--secondary-color); }
 
         .btn {
             background: var(--magma-gradient);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 14px 28px;
+            font-size: clamp(1rem, 5vw, 1.2rem);
             font-weight: bold;
             border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
             transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
-            width: 80%;
-            max-width: 300px;
-            margin-top: 10px;
+            width: 85%;
+            max-width: 350px;
         }
-        .btn:active { transform: scale(0.95); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Créditos */
-        .credits {
-            margin-top: 25px;
-            font-size: 0.85rem;
-            color: #888;
-            line-height: 1.6;
+        .credits { margin-top: 30px; font-size: 0.8rem; color: #777; line-height: 1.6; }
+        .credits a { color: var(--secondary-color); text-decoration: none; font-weight: bold; }
+
+        /* --- Tela do Jogo (Foco em Adaptabilidade) --- */
+        #screen-game {
+            justify-content: space-between; /* HUD no topo, Teclado no final */
         }
-        .credits a { color: var(--secondary-color); text-decoration: none; font-weight: bold; transition: color 0.3s; }
-        .credits a:hover { color: var(--primary-color); text-decoration: underline; }
 
-        /* HUD - Barra superior */
+        /* HUD - Espaço Fixo */
         .hud {
             display: flex;
             justify-content: space-between;
             width: 100%;
             background: var(--surface-color);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            flex-shrink: 0; /* Nunca diminui */
         }
-
         .hud-item { display: flex; flex-direction: column; align-items: center; }
-        .hud-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;}
-        .hud-value { font-size: 1.2rem; font-weight: bold; }
+        .hud-label { font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;}
+        .hud-value { font-size: 1.1rem; font-weight: bold; }
         .score-value { color: var(--secondary-color); }
         .streak-value { color: var(--success-color); }
-        .lives-value { color: var(--danger-color); }
+        .lives-value { color: var(--danger-color); font-size: 1rem;}
 
-        /* Dica / Pergunta */
-        .hint-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 5px solid var(--primary-color);
-            padding: 15px;
-            border-radius: 0 10px 10px 0;
+        /* Dica e Palavra - Espaço Flexível (O jogo se "aperta" aqui) */
+        .game-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centraliza dica e palavra verticalmente */
+            align-items: center;
             width: 100%;
-            margin-bottom: 25px;
-            font-size: 1rem;
-            line-height: 1.4;
+            gap: 15px;
+            overflow: hidden; /* Garante que nada saia daqui */
+            padding: 5px 0;
         }
 
-        /* Palavra - Container Principal */
+        .hint-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 0 8px 8px 0;
+            width: 100%;
+            max-width: 550px;
+            /* Diminui fonte se a tela for muito baixa */
+            font-size: clamp(0.85rem, 3.5dvh, 1rem); 
+            line-height: 1.4;
+            flex-shrink: 1; /* Permite diminuir se faltar espaço vertical */
+        }
+
         .word-display {
             display: flex;
-            flex-direction: row;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px; 
-            margin-bottom: 30px;
+            gap: clamp(8px, 2.5dvh, 15px); /* Gaps flexíveis */
             width: 100%;
+            margin: 5px 0;
         }
 
         .word-group {
             display: flex;
-            flex-wrap: wrap; 
             justify-content: center;
-            gap: 5px; 
+            gap: clamp(2px, 0.8dvh, 5px); /* Espaço entre letras aperto dinâmica */
         }
 
         .letter-box {
-            width: clamp(28px, 8vw, 40px);
-            height: clamp(35px, 10vw, 50px);
-            border-bottom: 3px solid var(--text-color);
+            /* Uso pesado de dvh/vmin para garantir que a letra NUNCA quebre a altura */
+            width: clamp(24px, 7.5vmin, 40px);
+            height: clamp(30px, 9.5vmin, 50px);
+            border-bottom: clamp(2px, 0.5dvh, 3px) solid var(--text-color);
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            font-size: clamp(1.4rem, 5vw, 2rem);
+            font-size: clamp(1.2rem, 7vmin, 2rem);
             font-weight: bold;
             color: var(--text-color);
             text-transform: uppercase;
-            padding-bottom: 5px;
+            padding-bottom: 2px;
         }
         .letter-box.revealed { border-bottom-color: var(--success-color); color: var(--success-color); }
+        .letter-box.space { border-bottom: none; width: clamp(10px, 3dvh, 20px); }
 
-        /* Teclado */
+        /* Estilo Dinâmico para Palavras GIGANTES (ex: MOHOROVICIC) - Aplicado via JS */
+        .long-word-group .letter-box {
+            width: clamp(18px, 6vmin, 28px);
+            height: clamp(25px, 8vmin, 40px);
+            font-size: clamp(1rem, 6vmin, 1.5rem);
+        }
+
+        /* Teclado - Espaço Fixo no Final (Prioridade de Interação) */
         .keyboard {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 5px;
+            gap: clamp(3px, 1vmin, 6px); /* Gaps flexíveis baseados no menor tamanho da tela */
             width: 100%;
-            margin-top: auto;
-            padding-bottom: 15px;
+            padding: 5px 0 10px 0;
+            flex-shrink: 0; /* Teclado NUNCA diminui ou soma */
         }
 
         .key {
@@ -208,36 +239,38 @@
             color: var(--text-color);
             border: 2px solid transparent;
             border-radius: 6px;
-            min-width: 9%;
-            flex: 1 1 9%;
-            height: 45px;
-            font-size: 1.2rem;
+            /* Garante 10 letras por linha max */
+            flex: 1 1 calc(10% - clamp(3px, 1vmin, 6px)); 
+            /* Altura adaptativa ao tamanho da tela, ideal para dedos */
+            height: clamp(38px, 6.5dvh, 50px); 
+            font-size: clamp(1rem, 4vmin, 1.3rem);
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
-            touch-action: manipulation;
+            transition: all 0.15s;
+            user-select: none;
         }
         .key:active { background: #444; transform: scale(0.9); }
         .key.correct { background: var(--success-color); color: white; pointer-events: none; }
         .key.wrong { background: transparent; border-color: var(--danger-color); color: #666; pointer-events: none; opacity: 0.5; }
 
-        /* Relatório */
+        /* --- Relatório Final --- */
         .report-card {
             background: var(--surface-color);
-            padding: 20px;
-            border-radius: 15px;
-            width: 100%;
-            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            margin-bottom: 15px;
         }
         .report-stat {
             display: flex;
             justify-content: space-between;
             border-bottom: 1px solid #444;
-            padding: 10px 0;
-            font-size: 1.1rem;
+            padding: 8px 0;
+            font-size: 1rem;
         }
         .report-stat:last-child { border-bottom: none; }
 
@@ -245,14 +278,14 @@
         .floating-text {
             position: absolute;
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: clamp(1.2rem, 6vmin, 1.5rem);
             pointer-events: none;
-            animation: floatUp 1s forwards ease-out;
+            animation: floatUp 0.8s forwards ease-out;
             z-index: 100;
         }
         @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
         }
     </style>
 </head>
@@ -264,10 +297,12 @@
         <h1>Geologia<br>Misteriosa</h1>
         <p class="subtitle">Decifre os conceitos escondidos. Acertos em sequência multiplicam pontos. Chutes penalizam sua nota.</p>
         
-        <input type="text" id="player-name" placeholder="Seu Nome ou Apelido" class="input-field" required>
-        <input type="text" id="player-class" placeholder="Sua Turma (Ex: 1º Ano A)" class="input-field" required>
+        <div class="input-group">
+            <input type="text" id="player-name" placeholder="Seu Nome ou Apelido" class="input-field" required maxlength="15">
+            <input type="text" id="player-class" placeholder="Sua Turma (Ex: 1º Ano A)" class="input-field" required maxlength="10">
+        </div>
 
-        <button class="btn" id="btn-start" onclick="iniciarJogo()" disabled>CARREGANDO BANCO...</button>
+        <button class="btn" id="btn-start" onclick="iniciarJogo()" disabled>CONECTANDO...</button>
         
         <div class="credits">
             Desenvolvido por <strong>Prof. Legeo</strong><br>
@@ -277,23 +312,16 @@
 
     <div id="screen-game" class="screen">
         <div class="hud">
-            <div class="hud-item">
-                <span class="hud-label">Pontos</span>
-                <span class="hud-value score-value" id="ui-score">0</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">Combo</span>
-                <span class="hud-value streak-value" id="ui-streak">x1</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">Vida</span>
-                <span class="hud-value lives-value" id="ui-lives">❤️❤️❤️❤️❤️</span>
-            </div>
+            <div class="hud-item"><span class="hud-label">Pontos</span><span class="hud-value score-value" id="ui-score">0</span></div>
+            <div class="hud-item"><span class="hud-label">Combo</span><span class="hud-value streak-value" id="ui-streak">x1</span></div>
+            <div class="hud-item"><span class="hud-label">Vida</span><span class="hud-value lives-value" id="ui-lives">❤️❤️❤️❤️❤️</span></div>
         </div>
 
-        <div class="hint-box" id="ui-hint">Processando...</div>
+        <div class="game-content">
+            <div class="hint-box" id="ui-hint">...</div>
+            <div class="word-display" id="ui-word"></div>
+        </div>
         
-        <div class="word-display" id="ui-word"></div>
         <div class="keyboard" id="ui-keyboard"></div>
     </div>
 
@@ -307,7 +335,7 @@
             <div class="report-stat"><span>Tempo:</span> <strong id="rep-time">0s</strong></div>
         </div>
         <h2 id="rep-title" style="margin-bottom: 20px;">Geólogo Aprendiz</h2>
-        <button class="btn" id="btn-restart" onclick="location.reload()" disabled>ENVIANDO DADOS...</button>
+        <button class="btn" id="btn-restart" onclick="location.reload()" disabled>ENVIANDO...</button>
         
         <div class="credits">
             Quer mais desafios com o <strong>Prof. Legeo</strong>?<br>
@@ -318,7 +346,7 @@
 </div>
 
 <script>
-    // URL EXATA DA SUA API DO GOOGLE SHEETS
+    // URL EXATA DA SUA API DO GOOGLE SHEETS (MANTIDA IGUAL)
     const API_URL = "https://script.google.com/macros/s/AKfycbyl3_a1RgLKmVHP7P-Wze5nuoB0pmoe2F2ggiudOrOPTHmOead6ZPs6tO450nf5eYmV/exec";
     
     let database = [];
@@ -334,10 +362,11 @@
     let maxRounds = 5; 
     let currentRound = 0;
     let startTime = 0;
+    let isGameOver = false;
 
     const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 
-    // Carrega os dados da planilha assim que a página abre
+    // Carrega os dados da planilha
     window.onload = async () => {
         const btn = document.getElementById('btn-start');
         try {
@@ -348,10 +377,9 @@
                 btn.textContent = "INICIAR EXPLORAÇÃO";
                 btn.disabled = false;
             } else {
-                btn.textContent = "BANCO VAZIO OU OFFLINE";
+                btn.textContent = "BANCO VAZIO";
             }
         } catch (error) {
-            console.error("Erro ao puxar dados:", error);
             btn.textContent = "ERRO DE CONEXÃO";
         }
     };
@@ -361,11 +389,10 @@
         const turma = document.getElementById('player-class').value.trim();
         
         if (!nome || !turma) {
-            alert("Por favor, preencha seu Nome e Turma antes de começar!");
+            alert("Preencha Nome e Turma!");
             return;
         }
 
-        // Ajusta rodadas pro tamanho do banco (max 5, mas se tiver menos, adapta)
         maxRounds = Math.min(5, database.length);
         gameQueue = [...database].sort(() => 0.5 - Math.random()).slice(0, maxRounds);
         
@@ -375,6 +402,7 @@
     }
 
     function loadNextWord() {
+        if (isGameOver) return;
         if (currentRound >= maxRounds || lives <= 0) {
             return finalizarPartida();
         }
@@ -398,28 +426,48 @@
     function renderWord() {
         const container = document.getElementById('ui-word');
         container.innerHTML = '';
-        let currentWordGroup = document.createElement('div');
-        currentWordGroup.className = 'word-group';
-        container.appendChild(currentWordGroup);
 
-        wordChars.forEach(obj => {
-            if (obj.char === ' ') {
-                currentWordGroup = document.createElement('div');
-                currentWordGroup.className = 'word-group';
-                container.appendChild(currentWordGroup);
-                obj.guessed = true; 
-            } else {
+        // Quebra o termo em palavras inteiras
+        const palavras = currentTerm.word.split(' ');
+
+        palavras.forEach((palavraOriginal, indexPalavra) => {
+            const wordGroup = document.createElement('div');
+            wordGroup.className = 'word-group';
+            
+            // Lógica Adaptativa Dinâmica do Prof. Legeo: Detecta palavras gigantes
+            // Se uma única palavra tiver mais de 8 letras, aplicamos um tamanho reduzido
+            if (palavraOriginal.length > 8) {
+                wordGroup.classList.add('long-word-group');
+            }
+
+            palavraOriginal.split('').forEach(charOriginal => {
+                const charNormalizado = normalize(charOriginal);
+                const isLetraValida = /[A-Z]/.test(charNormalizado);
+                
                 const div = document.createElement('div');
                 div.className = 'letter-box';
-                if (!obj.isLetter) {
+
+                if (!isLetraValida) {
                     div.style.borderBottom = "none";
-                    div.textContent = obj.char;
-                    obj.guessed = true;
-                } else if (obj.guessed) {
-                    div.textContent = obj.char;
-                    div.classList.add('revealed');
+                    div.textContent = charOriginal;
+                } else {
+                    // Busca se essa letra já foi acertada no estado global
+                    const jaGuessed = wordChars.find(c => c.char === charOriginal && c.guessed);
+                    if(jaGuessed) {
+                        div.textContent = charOriginal;
+                        div.classList.add('revealed');
+                    }
                 }
-                currentWordGroup.appendChild(div);
+                wordGroup.appendChild(div);
+            });
+
+            container.appendChild(wordGroup);
+
+            // Adiciona um espaço visual se não for a última palavra
+            if (indexPalavra < palavras.length - 1) {
+                const spaceDiv = document.createElement('div');
+                spaceDiv.className = 'letter-box space';
+                container.appendChild(spaceDiv);
             }
         });
     }
@@ -433,17 +481,22 @@
             const btn = document.createElement('button');
             btn.className = 'key';
             btn.textContent = letter;
+            
+            // Garante que toques no mobile não falhem
+            btn.addEventListener('touchstart', (e) => { e.stopPropagation(); });
             btn.onclick = (e) => handleGuess(letter, btn, e);
+            
             kb.appendChild(btn);
         });
     }
 
     function handleGuess(letter, btnElement, event) {
-        if (guessedLetters.has(letter)) return;
+        if (guessedLetters.has(letter) || isGameOver) return;
         guessedLetters.add(letter);
         totalClicks++;
         
         let found = false;
+        // Atualiza o estado global de acertos
         wordChars.forEach(obj => {
             if (obj.isLetter && obj.normalized === letter) {
                 obj.guessed = true;
@@ -458,49 +511,71 @@
             score += pointsEarned;
             streak++;
             if (streak > maxStreak) maxStreak = streak;
-            showFloatingText(`+${pointsEarned}`, event.clientX, event.clientY, 'var(--success-color)');
+            showFloatingText(`+${pointsEarned}`, event);
         } else {
             btnElement.classList.add('wrong');
             lives--;
             score = Math.max(0, score - 15); 
             streak = 1; 
-            showFloatingText("-15", event.clientX, event.clientY, 'var(--danger-color)');
-            if (lives <= 0) setTimeout(finalizarPartida, 1000);
+            showFloatingText("-15", event);
+            if (lives <= 0) setTimeout(finalizarPartida, 800);
         }
 
+        // Re-renderiza a palavra inteira baseada no novo estado global
         renderWord();
         updateHUD();
         checkWordCompletion();
     }
 
     function checkWordCompletion() {
-        if (wordChars.every(obj => obj.guessed)) {
+        // Verifica se todas as letras válidas do estado global estão 'guessed: true'
+        const isComplete = wordChars.filter(c => c.isLetter).every(obj => obj.guessed);
+        
+        if (isComplete && !isGameOver) {
             wordsCompleted++;
             score += (50 * lives); 
             currentRound++;
             document.querySelectorAll('.key').forEach(k => k.style.pointerEvents = 'none');
-            setTimeout(loadNextWord, 1500);
+            setTimeout(loadNextWord, 1200);
         }
     }
 
     function updateHUD() {
         document.getElementById('ui-score').textContent = score;
         document.getElementById('ui-streak').textContent = `x${streak}`;
-        document.getElementById('ui-lives').textContent = Array(5).fill('❤️').fill('🖤', lives).join('');
+        const vidasAtuais = lives > 0 ? lives : 0;
+        document.getElementById('ui-lives').textContent = Array(5).fill('❤️').fill('🖤', vidasAtuais).join('');
     }
 
-    function showFloatingText(text, x, y, color) {
+    function showFloatingText(text, event) {
         const el = document.createElement('div');
         el.className = 'floating-text';
         el.textContent = text;
-        el.style.color = color;
-        el.style.left = (x - 20) + 'px';
-        el.style.top = (y - 30) + 'px';
+        el.style.color = text.startsWith('+') ? 'var(--success-color)' : 'var(--danger-color)';
+        
+        // Lógica de posicionamento segura para toques ou cliques
+        let posX, posY;
+        if (event && event.touches && event.touches.length > 0) {
+            posX = event.touches[0].clientX;
+            posY = event.touches[0].clientY;
+        } else if (event && event.clientX) {
+            posX = event.clientX;
+            posY = event.clientY;
+        } else {
+            // Fallback para o HUD se não houver evento de toque
+            posX = window.innerWidth / 2;
+            posY = 100;
+        }
+
+        el.style.left = (posX - 25) + 'px';
+        el.style.top = (posY - 40) + 'px';
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1000);
+        setTimeout(() => el.remove(), 800);
     }
 
     async function finalizarPartida() {
+        if (isGameOver) return;
+        isGameOver = true;
         switchScreen('screen-end');
         
         const accuracy = totalClicks === 0 ? 0 : Math.round((correctClicks / totalClicks) * 100);
@@ -513,11 +588,10 @@
         document.getElementById('rep-time').textContent = `${tempoSegundos}s`;
 
         let title = "Perdido no Manto... Estude mais! 🧭";
-        if (wordsCompleted === maxRounds && accuracy > 80) title = "Mestre da Geopolítica! 🌋";
+        if (wordsCompleted === maxRounds && accuracy > 85) title = "Mestre da Geografia Interna! 🌋";
         else if (wordsCompleted >= Math.ceil(maxRounds / 2)) title = "Explorador da Litosfera! 🪨";
         document.getElementById('rep-title').textContent = title;
 
-        // Monta o pacote de dados para enviar para a planilha
         const dadosAluno = {
             nome: document.getElementById('player-name').value,
             turma: document.getElementById('player-class').value,
@@ -528,17 +602,15 @@
             tempo: tempoSegundos
         };
 
-        // Envia para o Apps Script
         try {
             await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain evita bloqueio de CORS no Google Apps Script
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(dadosAluno)
             });
-            document.getElementById('btn-restart').textContent = "DADOS SALVOS! NOVA EXPEDIÇÃO";
+            document.getElementById('btn-restart').textContent = "SALVO! NOVA EXPEDIÇÃO";
             document.getElementById('btn-restart').disabled = false;
         } catch (error) {
-            console.error("Erro ao salvar no ranking:", error);
             document.getElementById('btn-restart').textContent = "ERRO AO SALVAR. VOLTAR";
             document.getElementById('btn-restart').disabled = false;
         }
