@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Desafio Geológico - Prof. Legeo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #1a1a1d;
             --surface-color: #2b2b30;
+            --key-color: #3a3a40;
             --text-color: #f5f5f5;
             --primary-color: #ff5722;
             --secondary-color: #ff9800;
@@ -31,7 +32,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Uso de dvh para garantir adaptação dinâmica à altura útil real do celular */
             height: 100dvh;
             overflow: hidden;
             touch-action: manipulation;
@@ -39,15 +39,15 @@
 
         #app-container {
             width: 100%;
-            max-width: 650px; /* Um pouco mais largo para PCs */
-            height: 100%; /* Ocupa 100% da dvh do body */
+            max-width: 650px;
+            height: 100%;
             display: flex;
             flex-direction: column;
             padding: 10px;
             position: relative;
         }
 
-        /* Estrutura Base das Telas */
+        /* --- Telas Principais --- */
         .screen {
             display: none;
             flex-direction: column;
@@ -55,7 +55,7 @@
             height: 100%;
             text-align: center;
             animation: fadeIn 0.4s ease;
-            overflow: hidden; /* Evita scroll na tela de jogo */
+            overflow: hidden;
         }
         .screen.active { display: flex; }
 
@@ -64,10 +64,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Tela Inicial e Final --- */
         #screen-start, #screen-end {
             justify-content: center;
-            overflow-y: auto; /* Permite scroll apenas nessas telas se necessário */
+            overflow-y: auto;
             padding: 20px 0;
         }
 
@@ -91,13 +90,14 @@
             max-width: 450px;
         }
 
+        /* --- Formulário Inicial --- */
         .input-group {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .input-field {
@@ -115,6 +115,37 @@
         }
         .input-field:focus { border-color: var(--secondary-color); }
 
+        /* Seletor de Rodadas */
+        .rounds-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        
+        .rounds-label {
+            font-size: 0.9rem;
+            color: #888;
+            margin-right: 5px;
+        }
+        
+        .round-opt {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .round-opt.selected {
+            background: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
+        }
+
+        /* Botões Gerais */
         .btn {
             background: var(--magma-gradient);
             color: white;
@@ -135,12 +166,9 @@
         .credits { margin-top: 30px; font-size: 0.8rem; color: #777; line-height: 1.6; }
         .credits a { color: var(--secondary-color); text-decoration: none; font-weight: bold; }
 
-        /* --- Tela do Jogo (Foco em Adaptabilidade) --- */
-        #screen-game {
-            justify-content: space-between; /* HUD no topo, Teclado no final */
-        }
+        /* --- Tela do Jogo --- */
+        #screen-game { justify-content: space-between; }
 
-        /* HUD - Espaço Fixo */
         .hud {
             display: flex;
             justify-content: space-between;
@@ -149,7 +177,7 @@
             padding: 10px 15px;
             border-radius: 12px;
             margin-bottom: 10px;
-            flex-shrink: 0; /* Nunca diminui */
+            flex-shrink: 0;
         }
         .hud-item { display: flex; flex-direction: column; align-items: center; }
         .hud-label { font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;}
@@ -158,16 +186,15 @@
         .streak-value { color: var(--success-color); }
         .lives-value { color: var(--danger-color); font-size: 1rem;}
 
-        /* Dica e Palavra - Espaço Flexível (O jogo se "aperta" aqui) */
         .game-content {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centraliza dica e palavra verticalmente */
+            justify-content: center;
             align-items: center;
             width: 100%;
             gap: 15px;
-            overflow: hidden; /* Garante que nada saia daqui */
+            overflow: hidden;
             padding: 5px 0;
         }
 
@@ -178,17 +205,17 @@
             border-radius: 0 8px 8px 0;
             width: 100%;
             max-width: 550px;
-            /* Diminui fonte se a tela for muito baixa */
             font-size: clamp(0.85rem, 3.5dvh, 1rem); 
             line-height: 1.4;
-            flex-shrink: 1; /* Permite diminuir se faltar espaço vertical */
+            flex-shrink: 1;
         }
 
+        /* Container das Palavras */
         .word-display {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: clamp(8px, 2.5dvh, 15px); /* Gaps flexíveis */
+            gap: clamp(8px, 2.5dvh, 15px);
             width: 100%;
             margin: 5px 0;
         }
@@ -196,11 +223,10 @@
         .word-group {
             display: flex;
             justify-content: center;
-            gap: clamp(2px, 0.8dvh, 5px); /* Espaço entre letras aperto dinâmica */
+            gap: clamp(2px, 0.8dvh, 5px);
         }
 
         .letter-box {
-            /* Uso pesado de dvh/vmin para garantir que a letra NUNCA quebre a altura */
             width: clamp(24px, 7.5vmin, 40px);
             height: clamp(30px, 9.5vmin, 50px);
             border-bottom: clamp(2px, 0.5dvh, 3px) solid var(--text-color);
@@ -216,45 +242,70 @@
         .letter-box.revealed { border-bottom-color: var(--success-color); color: var(--success-color); }
         .letter-box.space { border-bottom: none; width: clamp(10px, 3dvh, 20px); }
 
-        /* Estilo Dinâmico para Palavras GIGANTES (ex: MOHOROVICIC) - Aplicado via JS */
         .long-word-group .letter-box {
             width: clamp(18px, 6vmin, 28px);
             height: clamp(25px, 8vmin, 40px);
             font-size: clamp(1rem, 6vmin, 1.5rem);
         }
 
-        /* Teclado - Espaço Fixo no Final (Prioridade de Interação) */
+        /* --- Teclado Nativo --- */
         .keyboard {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: clamp(3px, 1vmin, 6px); /* Gaps flexíveis baseados no menor tamanho da tela */
+            flex-direction: column;
+            gap: clamp(4px, 1.5vmin, 8px);
             width: 100%;
-            padding: 5px 0 10px 0;
-            flex-shrink: 0; /* Teclado NUNCA diminui ou soma */
+            max-width: 550px; 
+            margin: 0 auto;
+            padding: 5px 0 15px 0;
+            flex-shrink: 0;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: clamp(3px, 1.2vmin, 6px);
+            width: 100%;
         }
 
         .key {
-            background: var(--surface-color);
+            background: var(--key-color);
             color: var(--text-color);
-            border: 2px solid transparent;
-            border-radius: 6px;
-            /* Garante 10 letras por linha max */
-            flex: 1 1 calc(10% - clamp(3px, 1vmin, 6px)); 
-            /* Altura adaptativa ao tamanho da tela, ideal para dedos */
-            height: clamp(38px, 6.5dvh, 50px); 
-            font-size: clamp(1rem, 4vmin, 1.3rem);
-            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            flex: 0 1 9.5%; 
+            height: clamp(40px, 6.5dvh, 55px); 
+            font-size: clamp(1.1rem, 4.5vmin, 1.3rem);
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.15s;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.5); 
+            transition: all 0.1s ease;
             user-select: none;
         }
-        .key:active { background: #444; transform: scale(0.9); }
-        .key.correct { background: var(--success-color); color: white; pointer-events: none; }
-        .key.wrong { background: transparent; border-color: var(--danger-color); color: #666; pointer-events: none; opacity: 0.5; }
+
+        .key:active { 
+            transform: translateY(3px); 
+            box-shadow: 0 0 0 rgba(0,0,0,0.5); 
+            background: #555;
+        }
+
+        .key.correct { 
+            background: var(--success-color); 
+            color: white; 
+            pointer-events: none; 
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+            transform: translateY(1px);
+        }
+
+        .key.wrong { 
+            background: #222; 
+            color: #444; 
+            pointer-events: none; 
+            box-shadow: none;
+            transform: translateY(3px); 
+        }
 
         /* --- Relatório Final --- */
         .report-card {
@@ -274,7 +325,7 @@
         }
         .report-stat:last-child { border-bottom: none; }
 
-        /* Feedback Flutuante */
+        /* Animação Flutuante Restaurada */
         .floating-text {
             position: absolute;
             font-weight: bold;
@@ -295,14 +346,20 @@
     
     <div id="screen-start" class="screen active">
         <h1>Geologia<br>Misteriosa</h1>
-        <p class="subtitle">Decifre os conceitos escondidos. Acertos em sequência multiplicam pontos. Chutes penalizam sua nota.</p>
+        <p class="subtitle">Acertos em sequência multiplicam pontos. Chutes errados tiram vidas e quebram seu combo!</p>
         
         <div class="input-group">
             <input type="text" id="player-name" placeholder="Seu Nome ou Apelido" class="input-field" required maxlength="15">
             <input type="text" id="player-class" placeholder="Sua Turma (Ex: 1º Ano A)" class="input-field" required maxlength="10">
         </div>
 
-        <button class="btn" id="btn-start" onclick="iniciarJogo()" disabled>CONECTANDO...</button>
+        <div class="rounds-selector">
+            <span class="rounds-label">Nível da expedição:</span>
+            <button class="round-opt selected" onclick="setRounds(5)">5 Termos</button>
+            <button class="round-opt" onclick="setRounds(10)">10 Termos</button>
+        </div>
+
+        <button class="btn" id="btn-start" onclick="iniciarJogo()" disabled>CONECTANDO AO BANCO...</button>
         
         <div class="credits">
             Desenvolvido por <strong>Prof. Legeo</strong><br>
@@ -318,7 +375,7 @@
         </div>
 
         <div class="game-content">
-            <div class="hint-box" id="ui-hint">...</div>
+            <div class="hint-box" id="ui-hint">Processando...</div>
             <div class="word-display" id="ui-word"></div>
         </div>
         
@@ -335,7 +392,8 @@
             <div class="report-stat"><span>Tempo:</span> <strong id="rep-time">0s</strong></div>
         </div>
         <h2 id="rep-title" style="margin-bottom: 20px;">Geólogo Aprendiz</h2>
-        <button class="btn" id="btn-restart" onclick="location.reload()" disabled>ENVIANDO...</button>
+        
+        <button class="btn" id="btn-restart" onclick="restartChallenge()" disabled>ENVIANDO DADOS...</button>
         
         <div class="credits">
             Quer mais desafios com o <strong>Prof. Legeo</strong>?<br>
@@ -346,28 +404,35 @@
 </div>
 
 <script>
-    // URL EXATA DA SUA API DO GOOGLE SHEETS (MANTIDA IGUAL)
+    // URL DA API GOOGLE SHEETS
     const API_URL = "https://script.google.com/macros/s/AKfycbyl3_a1RgLKmVHP7P-Wze5nuoB0pmoe2F2ggiudOrOPTHmOead6ZPs6tO450nf5eYmV/exec";
     
+    // Variáveis Globais
     let database = [];
     let gameQueue = [];
     let currentTerm = null;
     let wordChars = [];
     let guessedLetters = new Set();
     
-    // Status do Jogador
     let score = 0, streak = 1, maxStreak = 1;
     let totalClicks = 0, correctClicks = 0, wordsCompleted = 0;
     let lives = 5;
-    let maxRounds = 5; 
+    let maxRounds = 5; // Default configurável
     let currentRound = 0;
     let startTime = 0;
     let isGameOver = false;
 
     const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 
-    // Carrega os dados da planilha
+    // Carregamento Inicial
     window.onload = async () => {
+        // Recupera dados salvos do aluno
+        const savedName = localStorage.getItem('legeo_name');
+        const savedClass = localStorage.getItem('legeo_class');
+        
+        if (savedName) document.getElementById('player-name').value = savedName;
+        if (savedClass) document.getElementById('player-class').value = savedClass;
+
         const btn = document.getElementById('btn-start');
         try {
             const response = await fetch(API_URL);
@@ -377,30 +442,67 @@
                 btn.textContent = "INICIAR EXPLORAÇÃO";
                 btn.disabled = false;
             } else {
-                btn.textContent = "BANCO VAZIO";
+                btn.textContent = "BANCO DE DADOS VAZIO";
             }
         } catch (error) {
-            btn.textContent = "ERRO DE CONEXÃO";
+            btn.textContent = "ERRO DE CONEXÃO COM O PLANILHAS";
         }
     };
 
+    // Função de Configuração de Rodadas
+    function setRounds(val) {
+        maxRounds = val;
+        const buttons = document.querySelectorAll('.round-opt');
+        buttons.forEach(b => {
+            if (parseInt(b.innerText) === val) {
+                b.classList.add('selected');
+            } else {
+                b.classList.remove('selected');
+            }
+        });
+    }
+
+    // Inicio de Partida
     function iniciarJogo() {
         const nome = document.getElementById('player-name').value.trim();
         const turma = document.getElementById('player-class').value.trim();
         
         if (!nome || !turma) {
-            alert("Preencha Nome e Turma!");
+            alert("Por favor, preencha seu Nome e Turma antes de começar!");
             return;
         }
 
-        maxRounds = Math.min(5, database.length);
-        gameQueue = [...database].sort(() => 0.5 - Math.random()).slice(0, maxRounds);
+        // Salva dados no celular do aluno para a próxima vez
+        localStorage.setItem('legeo_name', nome);
+        localStorage.setItem('legeo_class', turma);
+
+        // Prepara fila de palavras de acordo com a seleção (5 ou 10)
+        let totalTerms = Math.min(maxRounds, database.length);
+        gameQueue = [...database].sort(() => 0.5 - Math.random()).slice(0, totalTerms);
         
+        // Ajusta o contador visual caso o banco tenha menos palavras do que a escolha
+        maxRounds = gameQueue.length;
+        
+        resetGameState();
         startTime = Date.now();
         switchScreen('screen-game');
         loadNextWord();
     }
 
+    function resetGameState() {
+        score = 0;
+        streak = 1;
+        maxStreak = 1;
+        totalClicks = 0;
+        correctClicks = 0;
+        wordsCompleted = 0;
+        lives = 5;
+        currentRound = 0;
+        isGameOver = false;
+        guessedLetters.clear();
+    }
+
+    // Carrega Próxima Palavra
     function loadNextWord() {
         if (isGameOver) return;
         if (currentRound >= maxRounds || lives <= 0) {
@@ -423,19 +525,17 @@
         updateHUD();
     }
 
+    // Renderiza Caixas na Tela
     function renderWord() {
         const container = document.getElementById('ui-word');
         container.innerHTML = '';
 
-        // Quebra o termo em palavras inteiras
         const palavras = currentTerm.word.split(' ');
 
         palavras.forEach((palavraOriginal, indexPalavra) => {
             const wordGroup = document.createElement('div');
             wordGroup.className = 'word-group';
             
-            // Lógica Adaptativa Dinâmica do Prof. Legeo: Detecta palavras gigantes
-            // Se uma única palavra tiver mais de 8 letras, aplicamos um tamanho reduzido
             if (palavraOriginal.length > 8) {
                 wordGroup.classList.add('long-word-group');
             }
@@ -451,7 +551,6 @@
                     div.style.borderBottom = "none";
                     div.textContent = charOriginal;
                 } else {
-                    // Busca se essa letra já foi acertada no estado global
                     const jaGuessed = wordChars.find(c => c.char === charOriginal && c.guessed);
                     if(jaGuessed) {
                         div.textContent = charOriginal;
@@ -463,7 +562,6 @@
 
             container.appendChild(wordGroup);
 
-            // Adiciona um espaço visual se não for a última palavra
             if (indexPalavra < palavras.length - 1) {
                 const spaceDiv = document.createElement('div');
                 spaceDiv.className = 'letter-box space';
@@ -472,31 +570,47 @@
         });
     }
 
+    // Renderiza Teclado Nativo
     function renderKeyboard() {
         const kb = document.getElementById('ui-keyboard');
         kb.innerHTML = '';
-        const alphabet = "QWERTYUIOPASDFGHJKLZXCVBNM".split('');
         
-        alphabet.forEach(letter => {
-            const btn = document.createElement('button');
-            btn.className = 'key';
-            btn.textContent = letter;
+        const rows = [
+            "QWERTYUIOP".split(''),
+            "ASDFGHJKL".split(''),
+            "ZXCVBNM".split('')
+        ];
+        
+        rows.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'keyboard-row';
             
-            // Garante que toques no mobile não falhem
-            btn.addEventListener('touchstart', (e) => { e.stopPropagation(); });
-            btn.onclick = (e) => handleGuess(letter, btn, e);
+            row.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key';
+                btn.textContent = letter;
+                
+                btn.addEventListener('touchstart', (e) => { e.stopPropagation(); });
+                btn.onclick = (e) => handleGuess(letter, btn, e);
+                
+                if (guessedLetters.has(letter)) {
+                    btn.classList.add('wrong');
+                }
+                
+                rowDiv.appendChild(btn);
+            });
             
-            kb.appendChild(btn);
+            kb.appendChild(rowDiv);
         });
     }
 
+    // Processa Clique
     function handleGuess(letter, btnElement, event) {
         if (guessedLetters.has(letter) || isGameOver) return;
         guessedLetters.add(letter);
         totalClicks++;
         
         let found = false;
-        // Atualiza o estado global de acertos
         wordChars.forEach(obj => {
             if (obj.isLetter && obj.normalized === letter) {
                 obj.guessed = true;
@@ -507,35 +621,40 @@
         if (found) {
             correctClicks++;
             btnElement.classList.add('correct');
+            
             const pointsEarned = 10 * streak;
             score += pointsEarned;
             streak++;
             if (streak > maxStreak) maxStreak = streak;
+            
             showFloatingText(`+${pointsEarned}`, event);
         } else {
             btnElement.classList.add('wrong');
+            
             lives--;
             score = Math.max(0, score - 15); 
             streak = 1; 
+            
             showFloatingText("-15", event);
+            
             if (lives <= 0) setTimeout(finalizarPartida, 800);
         }
 
-        // Re-renderiza a palavra inteira baseada no novo estado global
         renderWord();
         updateHUD();
         checkWordCompletion();
     }
 
     function checkWordCompletion() {
-        // Verifica se todas as letras válidas do estado global estão 'guessed: true'
         const isComplete = wordChars.filter(c => c.isLetter).every(obj => obj.guessed);
         
         if (isComplete && !isGameOver) {
             wordsCompleted++;
             score += (50 * lives); 
             currentRound++;
+            
             document.querySelectorAll('.key').forEach(k => k.style.pointerEvents = 'none');
+            
             setTimeout(loadNextWord, 1200);
         }
     }
@@ -547,13 +666,13 @@
         document.getElementById('ui-lives').textContent = Array(5).fill('❤️').fill('🖤', vidasAtuais).join('');
     }
 
+    // A MÁGICA VISUAL ESTÁ DE VOLTA
     function showFloatingText(text, event) {
         const el = document.createElement('div');
         el.className = 'floating-text';
         el.textContent = text;
         el.style.color = text.startsWith('+') ? 'var(--success-color)' : 'var(--danger-color)';
         
-        // Lógica de posicionamento segura para toques ou cliques
         let posX, posY;
         if (event && event.touches && event.touches.length > 0) {
             posX = event.touches[0].clientX;
@@ -562,20 +681,22 @@
             posX = event.clientX;
             posY = event.clientY;
         } else {
-            // Fallback para o HUD se não houver evento de toque
             posX = window.innerWidth / 2;
-            posY = 100;
+            posY = window.innerHeight / 2;
         }
 
         el.style.left = (posX - 25) + 'px';
         el.style.top = (posY - 40) + 'px';
+        
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 800);
     }
 
+    // Finaliza e Envia
     async function finalizarPartida() {
         if (isGameOver) return;
         isGameOver = true;
+        
         switchScreen('screen-end');
         
         const accuracy = totalClicks === 0 ? 0 : Math.round((correctClicks / totalClicks) * 100);
@@ -590,6 +711,7 @@
         let title = "Perdido no Manto... Estude mais! 🧭";
         if (wordsCompleted === maxRounds && accuracy > 85) title = "Mestre da Geografia Interna! 🌋";
         else if (wordsCompleted >= Math.ceil(maxRounds / 2)) title = "Explorador da Litosfera! 🪨";
+        
         document.getElementById('rep-title').textContent = title;
 
         const dadosAluno = {
@@ -608,14 +730,22 @@
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                 body: JSON.stringify(dadosAluno)
             });
-            document.getElementById('btn-restart').textContent = "SALVO! NOVA EXPEDIÇÃO";
+            document.getElementById('btn-restart').textContent = "DADOS SALVOS! NOVO DESAFIO";
             document.getElementById('btn-restart').disabled = false;
         } catch (error) {
-            document.getElementById('btn-restart').textContent = "ERRO AO SALVAR. VOLTAR";
+            document.getElementById('btn-restart').textContent = "ERRO AO SALVAR. VOLTAR AO MENU";
             document.getElementById('btn-restart').disabled = false;
         }
     }
 
+    // Volta ao Menu sem recarregar a página toda
+    function restartChallenge() {
+        document.getElementById('btn-restart').disabled = true;
+        document.getElementById('btn-restart').textContent = "ENVIANDO DADOS...";
+        switchScreen('screen-start');
+    }
+
+    // Navegação de Telas
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
