@@ -77,7 +77,28 @@
 
         h2 { font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary-color); }
         
-        p.subtitle { font-size: 1rem; color: #aaa; margin-bottom: 30px; line-height: 1.5; }
+        p.subtitle { font-size: 1rem; color: #aaa; margin-bottom: 25px; line-height: 1.5; padding: 0 10px;}
+
+        /* Inputs de Identificação */
+        .input-field {
+            width: 80%;
+            max-width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #444;
+            color: var(--text-color);
+            padding: 14px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .input-field:focus {
+            border-color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .input-field::placeholder { color: #888; }
 
         .btn {
             background: var(--magma-gradient);
@@ -89,32 +110,23 @@
             border-radius: 30px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
             width: 80%;
             max-width: 300px;
             margin-top: 10px;
         }
         .btn:active { transform: scale(0.95); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* Créditos Prof. Legeo */
+        /* Créditos */
         .credits {
-            margin-top: 30px;
-            font-size: 0.9rem;
+            margin-top: 25px;
+            font-size: 0.85rem;
             color: #888;
             line-height: 1.6;
         }
-        
-        .credits a {
-            color: var(--secondary-color);
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        
-        .credits a:hover {
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
+        .credits a { color: var(--secondary-color); text-decoration: none; font-weight: bold; transition: color 0.3s; }
+        .credits a:hover { color: var(--primary-color); text-decoration: underline; }
 
         /* HUD - Barra superior */
         .hud {
@@ -128,14 +140,9 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        .hud-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        .hud-item { display: flex; flex-direction: column; align-items: center; }
         .hud-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;}
         .hud-value { font-size: 1.2rem; font-weight: bold; }
-        
         .score-value { color: var(--secondary-color); }
         .streak-value { color: var(--success-color); }
         .lives-value { color: var(--danger-color); }
@@ -158,17 +165,16 @@
             flex-direction: row;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px; /* Espaço entre as palavras inteiras */
+            gap: 15px; 
             margin-bottom: 30px;
             width: 100%;
         }
 
-        /* Grupo de Letras (Uma palavra) */
         .word-group {
             display: flex;
-            flex-wrap: wrap; /* Permite quebrar apenas se a palavra for GIGANTE (ex: Mohorovicic) */
+            flex-wrap: wrap; 
             justify-content: center;
-            gap: 5px; /* Espaço entre as letras da mesma palavra */
+            gap: 5px; 
         }
 
         .letter-box {
@@ -184,7 +190,6 @@
             text-transform: uppercase;
             padding-bottom: 5px;
         }
-        
         .letter-box.revealed { border-bottom-color: var(--success-color); color: var(--success-color); }
 
         /* Teclado */
@@ -215,7 +220,6 @@
             transition: all 0.2s;
             touch-action: manipulation;
         }
-
         .key:active { background: #444; transform: scale(0.9); }
         .key.correct { background: var(--success-color); color: white; pointer-events: none; }
         .key.wrong { background: transparent; border-color: var(--danger-color); color: #666; pointer-events: none; opacity: 0.5; }
@@ -237,7 +241,7 @@
         }
         .report-stat:last-child { border-bottom: none; }
 
-        /* Feedback Flutuante (Pontos) */
+        /* Feedback Flutuante */
         .floating-text {
             position: absolute;
             font-weight: bold;
@@ -258,8 +262,12 @@
     
     <div id="screen-start" class="screen active">
         <h1>Geologia<br>Misteriosa</h1>
-        <p class="subtitle">Decifre as camadas da Terra, descontinuidades e conceitos reológicos. <br><br>Acertos em sequência multiplicam seus pontos. Erros e chutes quebram seu combo e tiram pontos.</p>
-        <button class="btn" onclick="startGame()">INICIAR EXPLORAÇÃO</button>
+        <p class="subtitle">Decifre os conceitos escondidos. Acertos em sequência multiplicam pontos. Chutes penalizam sua nota.</p>
+        
+        <input type="text" id="player-name" placeholder="Seu Nome ou Apelido" class="input-field" required>
+        <input type="text" id="player-class" placeholder="Sua Turma (Ex: 1º Ano A)" class="input-field" required>
+
+        <button class="btn" id="btn-start" onclick="iniciarJogo()" disabled>CARREGANDO BANCO...</button>
         
         <div class="credits">
             Desenvolvido por <strong>Prof. Legeo</strong><br>
@@ -283,82 +291,92 @@
             </div>
         </div>
 
-        <div class="hint-box" id="ui-hint">Carregando dados...</div>
+        <div class="hint-box" id="ui-hint">Processando...</div>
         
         <div class="word-display" id="ui-word"></div>
-        
         <div class="keyboard" id="ui-keyboard"></div>
     </div>
 
     <div id="screen-end" class="screen">
         <h1>Relatório Final</h1>
         <div class="report-card">
-            <div class="report-stat"><span>Pontuação Total:</span> <strong id="rep-score" style="color: var(--secondary-color)">0</strong></div>
-            <div class="report-stat"><span>Conceitos Descobertos:</span> <strong id="rep-words">0/5</strong></div>
-            <div class="report-stat"><span>Maior Combo:</span> <strong id="rep-streak">x0</strong></div>
-            <div class="report-stat"><span>Precisão de Escavação:</span> <strong id="rep-accuracy">0%</strong></div>
+            <div class="report-stat"><span>Pontuação:</span> <strong id="rep-score" style="color: var(--secondary-color)">0</strong></div>
+            <div class="report-stat"><span>Conceitos:</span> <strong id="rep-words">0/0</strong></div>
+            <div class="report-stat"><span>Combo Máx:</span> <strong id="rep-streak">x0</strong></div>
+            <div class="report-stat"><span>Precisão:</span> <strong id="rep-accuracy">0%</strong></div>
+            <div class="report-stat"><span>Tempo:</span> <strong id="rep-time">0s</strong></div>
         </div>
-        <h2 id="rep-title">Geólogo Aprendiz</h2>
-        <button class="btn" onclick="location.reload()">NOVA EXPEDIÇÃO</button>
+        <h2 id="rep-title" style="margin-bottom: 20px;">Geólogo Aprendiz</h2>
+        <button class="btn" id="btn-restart" onclick="location.reload()" disabled>ENVIANDO DADOS...</button>
         
         <div class="credits">
             Quer mais desafios com o <strong>Prof. Legeo</strong>?<br>
-            <a href="https://www.legeo.com.br/jogos" target="_blank">Clique aqui e acesse o site oficial!</a>
+            <a href="https://www.legeo.com.br/jogos" target="_blank">Acesse o site oficial!</a>
         </div>
     </div>
 
 </div>
 
 <script>
-    // Base de dados ajustada (Descontinuidades sem "DESC DE")
-    const database = [
-        { word: "NÚCLEO INTERNO", hint: "A camada mais profunda, sólida e densa da Terra, composta principalmente por Níquel e Ferro (NiFe)." },
-        { word: "CROSTA OCEÂNICA", hint: "A camada superficial que forma o leito dos oceanos. É mais fina, porém mais densa que a base continental." },
-        { word: "ASTENOSFERA", hint: "Camada plástica e maleável do manto superior onde ocorrem os movimentos cíclicos do magma." },
-        { word: "ENDOSFERA", hint: "Nome dado ao núcleo terrestre dentro do modelo reológico (físico) da Terra." },
-        { word: "NÚCLEO EXTERNO", hint: "Camada fluida de ferro e níquel que envolve a região central sólida. Seu movimento gera o campo magnético da Terra." },
-        { word: "LEHMANN", hint: "A fronteira sísmica (descontinuidade) que separa o núcleo externo (líquido) do núcleo interno (sólido)." },
-        { word: "CROSTA CONTINENTAL", hint: "A camada externa que forma as massas terrestres. Mais espessa, composta principalmente de Sial (Silício e Alumínio)." },
-        { word: "MOHOROVICIC", hint: "A descontinuidade que marca a separação brusca entre a crosta terrestre e o manto superior." },
-        { word: "MANTO INFERIOR", hint: "A camada profunda e sólida do manto, localizada logo acima do núcleo." },
-        { word: "GUTENBERG", hint: "A descontinuidade que separa o manto inferior do núcleo externo." },
-        { word: "MESOSFERA", hint: "No modelo reológico, é a camada sólida e rígida do manto que fica entre a astenosfera e o núcleo." },
-        { word: "LITOSFERA", hint: "A camada mais externa e rígida do modelo reológico, englobando a crosta e a pontinha sólida do manto superior." },
-        { word: "MANTO SUPERIOR", hint: "A camada localizada logo abaixo da crosta, que contém rochas fundidas e a região plástica do magma." },
-        { word: "REPETTI", hint: "A descontinuidade (zona de transição) que divide o manto em sua porção superior e inferior." },
-        { word: "CORRENTES DE CONVECÇÃO", hint: "O motor das placas tectônicas: movimento cíclico do magma quente que sobe e do frio que desce no manto." },
-        { word: "GRAU GEOTÉRMICO", hint: "O índice que mede a taxa de aumento da temperatura à medida que descemos para o interior da Terra." }
-    ];
-
-    // Variáveis de Estado
+    // URL EXATA DA SUA API DO GOOGLE SHEETS
+    const API_URL = "https://script.google.com/macros/s/AKfycbyl3_a1RgLKmVHP7P-Wze5nuoB0pmoe2F2ggiudOrOPTHmOead6ZPs6tO450nf5eYmV/exec";
+    
+    let database = [];
     let gameQueue = [];
     let currentTerm = null;
     let wordChars = [];
     let guessedLetters = new Set();
     
     // Status do Jogador
-    let score = 0;
-    let streak = 1;
-    let maxStreak = 1;
-    let mistakes = 0;
-    let totalClicks = 0;
-    let correctClicks = 0;
-    let wordsCompleted = 0;
+    let score = 0, streak = 1, maxStreak = 1;
+    let totalClicks = 0, correctClicks = 0, wordsCompleted = 0;
     let lives = 5;
-    const maxRounds = 5; 
+    let maxRounds = 5; 
     let currentRound = 0;
+    let startTime = 0;
 
     const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 
-    function startGame() {
+    // Carrega os dados da planilha assim que a página abre
+    window.onload = async () => {
+        const btn = document.getElementById('btn-start');
+        try {
+            const response = await fetch(API_URL);
+            database = await response.json();
+            
+            if(database && database.length > 0) {
+                btn.textContent = "INICIAR EXPLORAÇÃO";
+                btn.disabled = false;
+            } else {
+                btn.textContent = "BANCO VAZIO OU OFFLINE";
+            }
+        } catch (error) {
+            console.error("Erro ao puxar dados:", error);
+            btn.textContent = "ERRO DE CONEXÃO";
+        }
+    };
+
+    function iniciarJogo() {
+        const nome = document.getElementById('player-name').value.trim();
+        const turma = document.getElementById('player-class').value.trim();
+        
+        if (!nome || !turma) {
+            alert("Por favor, preencha seu Nome e Turma antes de começar!");
+            return;
+        }
+
+        // Ajusta rodadas pro tamanho do banco (max 5, mas se tiver menos, adapta)
+        maxRounds = Math.min(5, database.length);
         gameQueue = [...database].sort(() => 0.5 - Math.random()).slice(0, maxRounds);
+        
+        startTime = Date.now();
         switchScreen('screen-game');
         loadNextWord();
     }
 
     function loadNextWord() {
         if (currentRound >= maxRounds || lives <= 0) {
-            return showReport();
+            return finalizarPartida();
         }
 
         currentTerm = gameQueue[currentRound];
@@ -380,15 +398,12 @@
     function renderWord() {
         const container = document.getElementById('ui-word');
         container.innerHTML = '';
-
-        // Cria o primeiro grupo de palavras
         let currentWordGroup = document.createElement('div');
         currentWordGroup.className = 'word-group';
         container.appendChild(currentWordGroup);
 
         wordChars.forEach(obj => {
             if (obj.char === ' ') {
-                // Ao encontrar espaço, cria um novo grupo para a próxima palavra (evita quebra no meio da palavra)
                 currentWordGroup = document.createElement('div');
                 currentWordGroup.className = 'word-group';
                 container.appendChild(currentWordGroup);
@@ -396,7 +411,6 @@
             } else {
                 const div = document.createElement('div');
                 div.className = 'letter-box';
-                
                 if (!obj.isLetter) {
                     div.style.borderBottom = "none";
                     div.textContent = obj.char;
@@ -426,7 +440,6 @@
 
     function handleGuess(letter, btnElement, event) {
         if (guessedLetters.has(letter)) return;
-        
         guessedLetters.add(letter);
         totalClicks++;
         
@@ -441,10 +454,18 @@
         if (found) {
             correctClicks++;
             btnElement.classList.add('correct');
-            handleCorrectGuess(event);
+            const pointsEarned = 10 * streak;
+            score += pointsEarned;
+            streak++;
+            if (streak > maxStreak) maxStreak = streak;
+            showFloatingText(`+${pointsEarned}`, event.clientX, event.clientY, 'var(--success-color)');
         } else {
             btnElement.classList.add('wrong');
-            handleWrongGuess(event);
+            lives--;
+            score = Math.max(0, score - 15); 
+            streak = 1; 
+            showFloatingText("-15", event.clientX, event.clientY, 'var(--danger-color)');
+            if (lives <= 0) setTimeout(finalizarPartida, 1000);
         }
 
         renderWord();
@@ -452,52 +473,20 @@
         checkWordCompletion();
     }
 
-    function handleCorrectGuess(event) {
-        const pointsEarned = 10 * streak;
-        score += pointsEarned;
-        streak++;
-        if (streak > maxStreak) maxStreak = streak;
-        
-        showFloatingText(`+${pointsEarned}`, event.clientX, event.clientY, 'var(--success-color)');
-    }
-
-    function handleWrongGuess(event) {
-        mistakes++;
-        lives--;
-        score = Math.max(0, score - 15); 
-        streak = 1; 
-        
-        showFloatingText("-15", event.clientX, event.clientY, 'var(--danger-color)');
-        
-        if (lives <= 0) {
-            setTimeout(showReport, 1000);
-        }
-    }
-
     function checkWordCompletion() {
-        const isComplete = wordChars.every(obj => obj.guessed);
-        if (isComplete) {
+        if (wordChars.every(obj => obj.guessed)) {
             wordsCompleted++;
             score += (50 * lives); 
             currentRound++;
-            
             document.querySelectorAll('.key').forEach(k => k.style.pointerEvents = 'none');
-            
-            setTimeout(() => {
-                loadNextWord();
-            }, 1500);
+            setTimeout(loadNextWord, 1500);
         }
     }
 
     function updateHUD() {
         document.getElementById('ui-score').textContent = score;
         document.getElementById('ui-streak').textContent = `x${streak}`;
-        
-        let hearts = '';
-        for(let i=0; i<5; i++) {
-            hearts += i < lives ? '❤️' : '🖤';
-        }
-        document.getElementById('ui-lives').textContent = hearts;
+        document.getElementById('ui-lives').textContent = Array(5).fill('❤️').fill('🖤', lives).join('');
     }
 
     function showFloatingText(text, x, y, color) {
@@ -511,22 +500,48 @@
         setTimeout(() => el.remove(), 1000);
     }
 
-    function showReport() {
+    async function finalizarPartida() {
         switchScreen('screen-end');
         
         const accuracy = totalClicks === 0 ? 0 : Math.round((correctClicks / totalClicks) * 100);
+        const tempoSegundos = Math.round((Date.now() - startTime) / 1000);
         
         document.getElementById('rep-score').textContent = score;
         document.getElementById('rep-words').textContent = `${wordsCompleted}/${maxRounds}`;
         document.getElementById('rep-streak').textContent = `x${maxStreak}`;
         document.getElementById('rep-accuracy').textContent = `${accuracy}%`;
+        document.getElementById('rep-time').textContent = `${tempoSegundos}s`;
 
-        let title = "";
-        if (wordsCompleted === maxRounds && accuracy > 80) title = "Mestre da Geopolítica e Reologia! 🌋";
-        else if (wordsCompleted >= 3) title = "Explorador da Litosfera! 🪨";
-        else title = "Perdido no Manto... Estude mais! 🧭";
-        
+        let title = "Perdido no Manto... Estude mais! 🧭";
+        if (wordsCompleted === maxRounds && accuracy > 80) title = "Mestre da Geopolítica! 🌋";
+        else if (wordsCompleted >= Math.ceil(maxRounds / 2)) title = "Explorador da Litosfera! 🪨";
         document.getElementById('rep-title').textContent = title;
+
+        // Monta o pacote de dados para enviar para a planilha
+        const dadosAluno = {
+            nome: document.getElementById('player-name').value,
+            turma: document.getElementById('player-class').value,
+            score: score,
+            acertos: `${wordsCompleted}/${maxRounds}`,
+            precisao: `${accuracy}%`,
+            combo: `x${maxStreak}`,
+            tempo: tempoSegundos
+        };
+
+        // Envia para o Apps Script
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain evita bloqueio de CORS no Google Apps Script
+                body: JSON.stringify(dadosAluno)
+            });
+            document.getElementById('btn-restart').textContent = "DADOS SALVOS! NOVA EXPEDIÇÃO";
+            document.getElementById('btn-restart').disabled = false;
+        } catch (error) {
+            console.error("Erro ao salvar no ranking:", error);
+            document.getElementById('btn-restart').textContent = "ERRO AO SALVAR. VOLTAR";
+            document.getElementById('btn-restart').disabled = false;
+        }
     }
 
     function switchScreen(screenId) {
