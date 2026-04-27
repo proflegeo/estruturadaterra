@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Desafio Geológico - Prof. Legeo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a1d;
+            --surface-color: #2b2b30;
+            --text-color: #f5f5f5;
+            --primary-color: #ff5722;
+            --secondary-color: #ff9800;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --magma-gradient: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Telas */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Títulos e Botões */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: var(--magma-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 { font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary-color); }
+        
+        p.subtitle { font-size: 1rem; color: #aaa; margin-bottom: 30px; line-height: 1.5; }
+
+        .btn {
+            background: var(--magma-gradient);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 80%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* Créditos Prof. Legeo */
+        .credits {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #888;
+            line-height: 1.6;
+        }
+        
+        .credits a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .credits a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        /* HUD - Barra superior */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            background: var(--surface-color);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hud-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;}
+        .hud-value { font-size: 1.2rem; font-weight: bold; }
+        
+        .score-value { color: var(--secondary-color); }
+        .streak-value { color: var(--success-color); }
+        .lives-value { color: var(--danger-color); }
+
+        /* Dica / Pergunta */
+        .hint-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        /* Palavra */
+        .word-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .letter-box {
+            width: 40px;
+            height: 50px;
+            border-bottom: 4px solid var(--text-color);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-transform: uppercase;
+        }
+        .letter-box.space { border-bottom: none; width: 20px; }
+        .letter-box.revealed { border-bottom-color: var(--success-color); color: var(--success-color); }
+        .letter-box.missed { border-bottom-color: var(--danger-color); color: var(--danger-color); }
+
+        /* Teclado */
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+
+        .key {
+            background: var(--surface-color);
+            color: var(--text-color);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            min-width: 10%;
+            flex: 1 1 10%;
+            height: 45px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .key:active { background: #444; }
+        .key.correct { background: var(--success-color); color: white; pointer-events: none; }
+        .key.wrong { background: transparent; border-color: var(--danger-color); color: #666; pointer-events: none; opacity: 0.5; }
+
+        /* Relatório */
+        .report-card {
+            background: var(--surface-color);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .report-stat {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #444;
+            padding: 10px 0;
+            font-size: 1.1rem;
+        }
+        .report-stat:last-child { border-bottom: none; }
+
+        /* Feedback Flutuante (Pontos) */
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: floatUp 1s forwards ease-out;
+            z-index: 100;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <div id="screen-start" class="screen active">
+        <h1>Geologia<br>Misteriosa</h1>
+        <p class="subtitle">Decifre as camadas da Terra, descontinuidades e conceitos reológicos. <br><br>Acertos em sequência multiplicam seus pontos. Erros e chutes quebram seu combo e tiram pontos. Cuidado!</p>
+        <button class="btn" onclick="startGame()">INICIAR EXPLORAÇÃO</button>
+        
+        <div class="credits">
+            Desenvolvido por <strong>Prof. Legeo</strong><br>
+            Acesse: <a href="https://www.legeo.com.br/jogos" target="_blank">legeo.com.br/jogos</a>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="hud">
+            <div class="hud-item">
+                <span class="hud-label">Pontos</span>
+                <span class="hud-value score-value" id="ui-score">0</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">Combo</span>
+                <span class="hud-value streak-value" id="ui-streak">x1</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">Vida</span>
+                <span class="hud-value lives-value" id="ui-lives">❤️❤️❤️❤️❤️</span>
+            </div>
+        </div>
+
+        <div class="hint-box" id="ui-hint">Carregando dados sísmicos...</div>
+        
+        <div class="word-display" id="ui-word"></div>
+        
+        <div class="keyboard" id="ui-keyboard"></div>
+    </div>
+
+    <div id="screen-end" class="screen">
+        <h1>Relatório de Campo</h1>
+        <div class="report-card">
+            <div class="report-stat"><span>Pontuação Total:</span> <strong id="rep-score" style="color: var(--secondary-color)">0</strong></div>
+            <div class="report-stat"><span>Conceitos Descobertos:</span> <strong id="rep-words">0/5</strong></div>
+            <div class="report-stat"><span>Maior Combo:</span> <strong id="rep-streak">x0</strong></div>
+            <div class="report-stat"><span>Precisão de Escavação:</span> <strong id="rep-accuracy">0%</strong></div>
+        </div>
+        <h2 id="rep-title">Geólogo Aprendiz</h2>
+        <button class="btn" onclick="location.reload()">NOVA EXPEDIÇÃO</button>
+        
+        <div class="credits">
+            Quer mais desafios com o <strong>Prof. Legeo</strong>?<br>
+            <a href="https://www.legeo.com.br/jogos" target="_blank">Clique aqui e acesse o site oficial!</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Base de dados baseada na lousa
+    const database = [
+        { word: "NÚCLEO INTERNO", hint: "A camada mais profunda, sólida e densa da Terra, composta principalmente por Níquel e Ferro (NiFe)." },
+        { word: "CROSTA OCEÂNICA", hint: "A camada superficial que forma o leito dos oceanos. É mais fina, porém mais densa que a base continental." },
+        { word: "ASTENOSFERA", hint: "Camada plástica e maleável do manto superior onde ocorrem os movimentos cíclicos do magma." },
+        { word: "ENDOSFERA", hint: "Nome dado ao núcleo terrestre dentro do modelo reológico (físico) da Terra." },
+        { word: "NÚCLEO EXTERNO", hint: "Camada fluida de ferro e níquel que envolve a região central sólida. Seu movimento gera o campo magnético da Terra." },
+        { word: "DESC DE LEHMANN", hint: "A fronteira sísmica que separa o núcleo externo (líquido) do núcleo interno (sólido)." },
+        { word: "CROSTA CONTINENTAL", hint: "A camada externa que forma as massas terrestres. Mais espessa, composta principalmente de Sial (Silício e Alumínio)." },
+        { word: "DESC DE MOHOROVICIC", hint: "A descontinuidade que marca a separação brusca entre a crosta terrestre e o manto superior." },
+        { word: "MANTO INFERIOR", hint: "A camada profunda e sólida do manto, localizada logo acima do núcleo." },
+        { word: "DESC DE GUTENBERG", hint: "A descontinuidade que separa o manto inferior do núcleo externo." },
+        { word: "MESOSFERA", hint: "No modelo reológico, é a camada sólida e rígida do manto que fica entre a astenosfera e o núcleo." },
+        { word: "LITOSFERA", hint: "A camada mais externa e rígida do modelo reológico, englobando a crosta e a pontinha sólida do manto superior." },
+        { word: "MANTO SUPERIOR", hint: "A camada localizada logo abaixo da crosta, que contém rochas fundidas e a região plástica do magma." },
+        { word: "DESC DE REPETTI", hint: "A zona de transição que divide o manto em sua porção superior e inferior." },
+        { word: "CORRENTES DE CONVECÇÃO", hint: "O motor das placas tectônicas: movimento cíclico do magma quente que sobe e do frio que desce no manto." },
+        { word: "GRAU GEOTÉRMICO", hint: "O índice que mede a taxa de aumento da temperatura à medida que descemos para o interior da Terra." }
+    ];
+
+    // Variáveis de Estado
+    let gameQueue = [];
+    let currentTerm = null;
+    let wordChars = [];
+    let guessedLetters = new Set();
+    
+    // Status do Jogador
+    let score = 0;
+    let streak = 1;
+    let maxStreak = 1;
+    let mistakes = 0;
+    let totalClicks = 0;
+    let correctClicks = 0;
+    let wordsCompleted = 0;
+    let lives = 5;
+    const maxRounds = 5; // Define quantas palavras por jogo
+    let currentRound = 0;
+
+    // Normalizador de acentos para o jogo
+    const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+
+    function startGame() {
+        // Seleciona X palavras aleatórias da base
+        gameQueue = [...database].sort(() => 0.5 - Math.random()).slice(0, maxRounds);
+        
+        switchScreen('screen-game');
+        loadNextWord();
+    }
+
+    function loadNextWord() {
+        if (currentRound >= maxRounds || lives <= 0) {
+            return showReport();
+        }
+
+        currentTerm = gameQueue[currentRound];
+        guessedLetters.clear();
+        wordChars = currentTerm.word.split('').map(char => ({
+            char: char,
+            normalized: normalize(char),
+            isLetter: /[A-Z]/.test(normalize(char)),
+            guessed: false
+        }));
+
+        document.getElementById('ui-hint').innerHTML = `<strong>Dica ${currentRound + 1}/${maxRounds}:</strong> ${currentTerm.hint}`;
+        
+        renderWord();
+        renderKeyboard();
+        updateHUD();
+    }
+
+    function renderWord() {
+        const container = document.getElementById('ui-word');
+        container.innerHTML = '';
+
+        wordChars.forEach(obj => {
+            const div = document.createElement('div');
+            if (!obj.isLetter) {
+                div.className = 'letter-box space';
+                div.textContent = obj.char === ' ' ? '' : obj.char;
+                obj.guessed = true; // Auto-resolve espaços e pontuação
+            } else {
+                div.className = 'letter-box';
+                if (obj.guessed) {
+                    div.textContent = obj.char;
+                    div.classList.add('revealed');
+                }
+            }
+            container.appendChild(div);
+        });
+    }
+
+    function renderKeyboard() {
+        const kb = document.getElementById('ui-keyboard');
+        kb.innerHTML = '';
+        const alphabet = "QWERTYUIOPASDFGHJKLZXCVBNM".split('');
+        
+        alphabet.forEach(letter => {
+            const btn = document.createElement('button');
+            btn.className = 'key';
+            btn.textContent = letter;
+            btn.onclick = (e) => handleGuess(letter, btn, e);
+            kb.appendChild(btn);
+        });
+    }
+
+    function handleGuess(letter, btnElement, event) {
+        if (guessedLetters.has(letter)) return;
+        
+        guessedLetters.add(letter);
+        totalClicks++;
+        
+        let found = false;
+        wordChars.forEach(obj => {
+            if (obj.isLetter && obj.normalized === letter) {
+                obj.guessed = true;
+                found = true;
+            }
+        });
+
+        if (found) {
+            correctClicks++;
+            btnElement.classList.add('correct');
+            handleCorrectGuess(event);
+        } else {
+            btnElement.classList.add('wrong');
+            handleWrongGuess(event);
+        }
+
+        renderWord();
+        updateHUD();
+        checkWordCompletion();
+    }
+
+    function handleCorrectGuess(event) {
+        const pointsEarned = 10 * streak;
+        score += pointsEarned;
+        streak++;
+        if (streak > maxStreak) maxStreak = streak;
+        
+        showFloatingText(`+${pointsEarned}`, event.clientX, event.clientY, 'var(--success-color)');
+    }
+
+    function handleWrongGuess(event) {
+        mistakes++;
+        lives--;
+        score = Math.max(0, score - 15); // Penalidade por chute/erro
+        streak = 1; // Quebra o combo
+        
+        showFloatingText("-15", event.clientX, event.clientY, 'var(--danger-color)');
+        
+        if (lives <= 0) {
+            setTimeout(showReport, 1000);
+        }
+    }
+
+    function checkWordCompletion() {
+        const isComplete = wordChars.every(obj => obj.guessed);
+        if (isComplete) {
+            wordsCompleted++;
+            score += (50 * lives); // Bônus por vidas restantes
+            currentRound++;
+            
+            // Desabilita teclado rápido
+            document.querySelectorAll('.key').forEach(k => k.style.pointerEvents = 'none');
+            
+            setTimeout(() => {
+                loadNextWord();
+            }, 1500);
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('ui-score').textContent = score;
+        document.getElementById('ui-streak').textContent = `x${streak}`;
+        
+        let hearts = '';
+        for(let i=0; i<5; i++) {
+            hearts += i < lives ? '❤️' : '🖤';
+        }
+        document.getElementById('ui-lives').textContent = hearts;
+    }
+
+    function showFloatingText(text, x, y, color) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.textContent = text;
+        el.style.color = color;
+        el.style.left = (x - 20) + 'px';
+        el.style.top = (y - 30) + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function showReport() {
+        switchScreen('screen-end');
+        
+        const accuracy = totalClicks === 0 ? 0 : Math.round((correctClicks / totalClicks) * 100);
+        
+        document.getElementById('rep-score').textContent = score;
+        document.getElementById('rep-words').textContent = `${wordsCompleted}/${maxRounds}`;
+        document.getElementById('rep-streak').textContent = `x${maxStreak}`;
+        document.getElementById('rep-accuracy').textContent = `${accuracy}%`;
+
+        let title = "";
+        if (wordsCompleted === maxRounds && accuracy > 80) title = "Mestre da Geopolítica e Reologia! 🌋";
+        else if (wordsCompleted >= 3) title = "Explorador da Litosfera! 🪨";
+        else title = "Perdido no Manto... Estude mais! 🧭";
+        
+        document.getElementById('rep-title').textContent = title;
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+</script>
+</body>
+</html>
